@@ -1,0 +1,26 @@
+<annotation>
+	<folder>New folder</folder>
+	<filename>c1r1e1n7.tif</filename>
+	<path>C:\Users\devu laptop\Documents\fabric dataset\data\New folder\c1r1e1n7.tif</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>768</width>
+		<height>512</height>
+		<depth>1</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Hole</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>206</xmin>
+			<ymin>236</ymin>
+			<xmax>229</xmax>
+			<ymax>270</ymax>
+		</bndbox>
+	</object>
+</annotation>
