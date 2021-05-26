@@ -115,7 +115,7 @@ def evaluate(model, data_loader, device):
        
 
 @torch.no_grad()
-def get_model_result(img, model, target, i, device, location="", threshold=0.45):
+def get_model_result(img, model, target, i, device, location="", threshold=0.45,classes=['bg']):
     model.eval()
 
     prediction = model([img.to(device)])
@@ -123,14 +123,14 @@ def get_model_result(img, model, target, i, device, location="", threshold=0.45)
     boxes, scores, labels = prediction["boxes"], prediction["scores"], prediction["labels"]
     labels = labels.detach().cpu().numpy()
     text_labels = []
-    for i in range(len(labels)):
-        if labels[i]==1:
-            text_labels.append("det")
-        elif labels[i]==2:
-            text_labels.append('det')
-        elif labels[i]==2:
-            text_labels.append('det')
-        
+    
+
+    for i in labels:
+        if i>0:
+            cls  = classes[i-1]
+            text_labels.append(cls)
+    print('initial boxes:',text_labels)
+
     orig = Image.fromarray(img.mul(255).permute(1, 2, 0).byte().numpy())
     
     # In case no boxes are predicted by the model
@@ -155,9 +155,13 @@ def get_model_result(img, model, target, i, device, location="", threshold=0.45)
     
     for j in range(len(target['boxes'])):
         box = target['boxes'][j]
+        
+        label = target['labels'].numpy()[j]
+        cls  = classes[label-1]
+
         box = box.tolist()
         draw = ImageDraw.Draw(orig)
-        draw.text((box[0], box[1] - 10), "GT", fill=(255, 40, 40))
+        draw.text((box[0], box[1] - 10), cls, fill=(255, 40, 40))
         draw.rectangle(box, outline="green")
         del draw
         
@@ -165,12 +169,16 @@ def get_model_result(img, model, target, i, device, location="", threshold=0.45)
         box = boxes[j]
         box = box.tolist()
         draw = ImageDraw.Draw(orig)
+        draw.text((box[0], box[1]-10), text_labels[j], fill=(40,40,255))
+        draw.rectangle(box, outline = "blue")
+        '''
         if labels[j] == 1:
             draw.text((box[0], box[1]-10), text_labels[j], fill=(40,40,255))
             draw.rectangle(box, outline = "blue")
         elif labels[j]==2:
             draw.text((box[0], box[1] - 10), text_labels[j], fill=(255, 40, 40))
             draw.rectangle(box, outline="red")
+        '''
         del draw
     #orig.show(command='fim')
     orig.save(os.path.join(location, "result" + str(i) + ".png"))

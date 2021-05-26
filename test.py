@@ -12,10 +12,25 @@ import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.rpn import AnchorGenerator, RPNHead
 
+
 PATH = 'Weight.pth'
+
 output_image_folder = 'output'
-num_classes = 3  # 2 class (person) + background
-test_size = 80 # leave 80 images for testing
+
+proj = 'sign' # 'sign','fabric' (put ur project name here)
+
+if proj == 'sign':
+    classes = ['warning', 'prohibitory', 'mandatory']
+elif proj == 'fabric':
+    classes = ['Hole', 'Line', 'Stain']
+else:
+    classes = ['bg']
+
+num_classes = len(classes)+1  # n class + background
+
+
+output_image_folder = 'output'
+test_size = 50 # leave 80 images for testing
 
 
 if __name__ == "__main__":
@@ -28,7 +43,7 @@ if __name__ == "__main__":
     print("Free memory:", info.free)
     print("Used memory:", info.used)
     
-    dataset_test = FacialDataset('data/test', get_transform(horizontal_flip=False))
+    dataset_test = FacialDataset('data/test', get_transform(horizontal_flip=False),classes=classes)
         
     data_loader_test = torch.utils.data.DataLoader(
         dataset_test, batch_size=1, shuffle=False, num_workers=0,
@@ -67,7 +82,7 @@ if __name__ == "__main__":
         img_test = batch_sampler[0][0]
         target_test = batch_sampler[1][0]
         i = target_test["image_id"].item()
-        get_model_result(img_test, model, target_test, i, device, location=output_image_folder, threshold=0.15)
+        get_model_result(img_test, model, target_test, i, device, location=output_image_folder, threshold=0.15,classes=classes)
     
     print("Testing complete!")
     
