@@ -1,6 +1,8 @@
 # faster_rcnn_pytorch
 
-Modified from KaggleFaceMaskDetection
+## clone repo
+
+```git clone https://github.com/jerinka/FastRCNN_Pytorch.git -b sign Sign_Det```
 
 ## Introduction
 

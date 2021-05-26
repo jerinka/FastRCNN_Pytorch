@@ -7,7 +7,7 @@ import utilities.transforms as T
 
 
 class FacialDataset(object):
-    def __init__(self, root, transforms, train=True):
+    def __init__(self, root, transforms, train=True,classes=['det']):
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
@@ -15,6 +15,7 @@ class FacialDataset(object):
         self.train = train
         self.imgs = list(sorted(os.listdir(os.path.join(root, "images"))))
         self.annotations = list(sorted(os.listdir(os.path.join(root, "annotations"))))
+        self.classes = classes
         
 
     def __getitem__(self, idx):
@@ -43,15 +44,18 @@ class FacialDataset(object):
             xmax = int(box.getElementsByTagName("xmax")[0].childNodes[0].data)
             ymax = int(box.getElementsByTagName("ymax")[0].childNodes[0].data)
             boxes.append([xmin, ymin, xmax, ymax])
-            if cls_name=="without_mask": 
-                labels.append(1)
+            if cls_name in self.classes:
+                cls_indx = self.classes.index(cls_name)+1
+                labels.append(cls_indx)
             else:
-                labels.append(2)
+                labels.append(0)#for back ground
 
             for i in range(xmin, min(xmax+1, image_width)):
                 for j in range(ymin, min(ymax+1, image_height)):
                     masks[box_num, i, j] = 1
             box_num += 1
+
+        #import pdb;pdb.set_trace()
 
         # convert everything into a torch.Tensor
         boxes = torch.as_tensor(boxes, dtype=torch.float32)

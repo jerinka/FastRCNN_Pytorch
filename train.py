@@ -17,9 +17,22 @@ from torchvision.models.detection.rpn import AnchorGenerator, RPNHead
 PATH = 'Weight.pth'
 
 output_image_folder = 'output'
-num_classes = 3  # 2 class (person) + background
+
+proj = 'sign' # 'sign','fabric' (put ur project name here)
+
+if proj == 'sign':
+    classes = ['warning', 'prohibitory', 'mandatory']
+elif proj == 'fabric':
+    classes = ['Hole', 'Line', 'Stain']
+else:
+    classes = ['bg']
+
+num_classes = len(classes)+1  # n class + background
+
 batch_size = 3
+
 num_epochs = 1
+
 
 
 if __name__ == "__main__":
@@ -32,8 +45,8 @@ if __name__ == "__main__":
     print("Free memory:", info.free)
     print("Used memory:", info.used)
 
-    dataset_train = FacialDataset('data/train', get_transform(horizontal_flip=True))
-    dataset_test = FacialDataset('data/test', get_transform(horizontal_flip=False))
+    dataset_train = FacialDataset('data/train', get_transform(horizontal_flip=True),classes=classes)
+    dataset_test = FacialDataset('data/test', get_transform(horizontal_flip=False),classes=classes)
 
     data_loader_train = torch.utils.data.DataLoader(
             dataset_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=0,
@@ -94,7 +107,7 @@ if __name__ == "__main__":
         img_test = batch_sampler[0][0]
         target_test = batch_sampler[1][0]
         i = target_test["image_id"].item()
-        get_model_result(img_test, model, target_test, i, device, location=output_image_folder, threshold=0.15)
+        get_model_result(img_test, model, target_test, i, device, location=output_image_folder, threshold=0.15,classes=classes)
 
     print("Testing complete!")
     
