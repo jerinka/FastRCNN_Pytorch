@@ -18,7 +18,9 @@ PATH = 'Weight.pth'
 
 output_image_folder = 'output'
 
-proj = 'sign' # 'sign','fabric' (put ur project name here)
+
+proj = 'fabric' # 'sign','fabric' (put ur project name here)
+
 
 if proj == 'sign':
     classes = ['warning', 'prohibitory', 'mandatory']
