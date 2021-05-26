@@ -2,7 +2,7 @@
 
 ## clone repo
 
-```git clone https://github.com/jerinka/FastRCNN_Pytorch.git -b sign Sign_Det```
+```git clone https://github.com/jerinka/FastRCNN_Pytorch.git -b fabric Fabric_FRCNN```
 
 ## Introduction
 
