@@ -49,6 +49,18 @@ test.py
 
 ```pip3 install -r requirements.txt```
 
+```pip3 install jupyter notebook```
+
+```pip install ipykernel```
+
+```python -m ipykernel install --user --name=venv3```
+
+```deactivate```
+
+```source venv3/bin/activate```
+
+
+
 ## Activating env (every time u open terminal)
 
 ```source venv3/bin/activate```
