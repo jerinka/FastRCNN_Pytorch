@@ -10,6 +10,7 @@ from utilities.coco_utils.coco_eval import CocoEvaluator
 from utilities import utils
 import numpy as np
 import os
+import cv2
 
 
 def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
@@ -112,10 +113,25 @@ def evaluate(model, data_loader, device):
     coco_evaluator.summarize()
     torch.set_num_threads(n_threads)
     return coco_evaluator
-       
 
 @torch.no_grad()
-def get_model_result(img, model, target, id_, device, location="", threshold=0.45,classes=['bg'],dump_crop=True):
+def dump_crop(img,box,cls, img_name,dump_crop_flag):
+    
+    parent_dir = os.getcwd()
+    path = os.path.join(parent_dir,'MaskClassifier/DB/dumps',cls)
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    x1,y1,x2,y2 = box
+    crop = img[int(y1):int(y2), int(x1):int(x2),:]
+    if dump_crop_flag:
+        img_path = os.path.join(path, img_name)
+        cv2.imwrite(img_path, crop)
+    return crop
+        
+    
+
+@torch.no_grad()
+def get_model_result(img, model, target, id_, device, location="", threshold=0.45,classes=['bg'],dump_crop_flag=True,img_name=None,level1=None,man=None,war=None,pro=None):
     model.eval()
 
     prediction = model([img.to(device)])
@@ -132,6 +148,11 @@ def get_model_result(img, model, target, id_, device, location="", threshold=0.4
     print('initial boxes:',text_labels)
 
     orig = Image.fromarray(img.mul(255).permute(1, 2, 0).byte().numpy())
+    
+    open_cv_image = np.array(orig) 
+    # Convert RGB to BGR 
+    open_cv_image = open_cv_image[:, :, ::-1].copy() 
+    
     
     # In case no boxes are predicted by the model
     if boxes.size()==torch.Size([0, 4]):
@@ -177,8 +198,23 @@ def get_model_result(img, model, target, id_, device, location="", threshold=0.4
         
         print('Final pred boxes:', cls, box)
         
+        img_name = str(id_) +'_'+ str(j)+".png"
+        crop = dump_crop(open_cv_image, box, cls, img_name,dump_crop_flag)
+            
+        cls1,score = level1.predict_opencv_image(crop)
+        
+        #import pdb;pdb.set_trace()
+        
+        if cls1 == 'mandatory':
+            cls2 = man.predict_opencv_image(crop)
+        elif cls1 == 'prohibitory':
+            cls2 = pro.predict_opencv_image(crop)
+        elif cls1 == 'warning':
+            cls2 = war.predict_opencv_image(crop)
+            
         draw = ImageDraw.Draw(orig)
-        draw.text((box[0], box[1]-10), text_labels[j], fill=(40,40,255))
+        draw.text((box[0], box[1]-10), cls1, fill=(40,40,255))
+        draw.text((box[2], box[1]-10), cls2, fill=(40,40,255))
         draw.rectangle(box, outline = "blue")
         '''
         if labels[j] == 1:
