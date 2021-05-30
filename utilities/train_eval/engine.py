@@ -115,19 +115,22 @@ def evaluate(model, data_loader, device):
     return coco_evaluator
 
 @torch.no_grad()
-def dump_crop(img,box,cls, img_name,dump_crop_flag):
+def dump_crop(crop,cls, img_name):
     
     parent_dir = os.getcwd()
-    path = os.path.join(parent_dir,'MaskClassifier/DB/dumps',cls)
+    path = os.path.join(parent_dir,'DB/dumps',cls)
     if not os.path.isdir(path):
         os.makedirs(path)
+    img_path = os.path.join(path, img_name)
+    cv2.imwrite(img_path, crop)
+    return 0
+
+@torch.no_grad()
+def get_crop(img,box):
+    
     x1,y1,x2,y2 = box
     crop = img[int(y1):int(y2), int(x1):int(x2),:]
-    if dump_crop_flag:
-        img_path = os.path.join(path, img_name)
-        cv2.imwrite(img_path, crop)
-    return crop
-        
+    return crop       
     
 
 @torch.no_grad()
@@ -174,7 +177,6 @@ def get_model_result(img, model, target, id_, device, location="", threshold=0.4
     iou_threshold=0.45
     ind = torchvision.ops.nms(boxes.cpu(), torch.from_numpy(n_s), iou_threshold)
     
-    #import pdb;pdb.set_trace()
     
     
     for j in range(len(target['boxes'])):
@@ -183,13 +185,13 @@ def get_model_result(img, model, target, id_, device, location="", threshold=0.4
         label = target['labels'].numpy()[j]
         cls  = classes[label-1]
         
-        print('True boxes:', cls, box)
+        #print('True boxes:', cls, box)
 
-        box = box.tolist()
-        draw = ImageDraw.Draw(orig)
-        draw.text((box[0], box[1] - 10), cls, fill=(255, 40, 40))
-        draw.rectangle(box, outline="green")
-        del draw
+        #box = box.tolist()
+        #draw = ImageDraw.Draw(orig)
+        #draw.text((box[0], box[1] - 10), cls, fill=(255, 40, 40))
+        #draw.rectangle(box, outline="green")
+        #del draw
        
     for j in ind:
         box = boxes[j]
@@ -199,22 +201,27 @@ def get_model_result(img, model, target, id_, device, location="", threshold=0.4
         print('Final pred boxes:', cls, box)
         
         img_name = str(id_) +'_'+ str(j)+".png"
-        crop = dump_crop(open_cv_image, box, cls, img_name,dump_crop_flag)
+        
+        crop = get_crop(open_cv_image,box)
+        
             
         cls1,score = level1.predict_opencv_image(crop)
         
         #import pdb;pdb.set_trace()
         
         if cls1 == 'mandatory':
-            cls2 = man.predict_opencv_image(crop)
+            cls2,sc2 = man.predict_opencv_image(crop)
         elif cls1 == 'prohibitory':
-            cls2 = pro.predict_opencv_image(crop)
+            cls2,sc2 = pro.predict_opencv_image(crop)
         elif cls1 == 'warning':
-            cls2 = war.predict_opencv_image(crop)
-            
+            cls2,sc2 = war.predict_opencv_image(crop)
+        
+        #import pdb;pdb.set_trace()
+        dump_crop(crop,cls2, img_name)
+        
         draw = ImageDraw.Draw(orig)
-        draw.text((box[0], box[1]-10), cls1, fill=(40,40,255))
-        draw.text((box[2], box[1]-10), cls2, fill=(40,40,255))
+        draw.text((box[0], box[1]-10), cls1, fill=(60,60,255))
+        draw.text((box[0], box[3]-10), cls2, fill=(40,40,255))
         draw.rectangle(box, outline = "blue")
         '''
         if labels[j] == 1:
