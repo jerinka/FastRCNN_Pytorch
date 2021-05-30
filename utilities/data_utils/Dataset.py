@@ -6,7 +6,7 @@ import numpy as np
 import utilities.transforms as T
 
 
-class FacialDataset(object):
+class DatasetGen(object):
     def __init__(self, root, transforms, train=True,classes=['det']):
         self.root = root
         self.transforms = transforms

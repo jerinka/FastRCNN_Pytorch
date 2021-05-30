@@ -115,7 +115,7 @@ def evaluate(model, data_loader, device):
        
 
 @torch.no_grad()
-def get_model_result(img, model, target, i, device, location="", threshold=0.45,classes=['bg']):
+def get_model_result(img, model, target, id_, device, location="", threshold=0.45,classes=['bg'],dump_crop=True):
     model.eval()
 
     prediction = model([img.to(device)])
@@ -153,21 +153,30 @@ def get_model_result(img, model, target, i, device, location="", threshold=0.45,
     iou_threshold=0.45
     ind = torchvision.ops.nms(boxes.cpu(), torch.from_numpy(n_s), iou_threshold)
     
+    #import pdb;pdb.set_trace()
+    
+    
     for j in range(len(target['boxes'])):
         box = target['boxes'][j]
         
         label = target['labels'].numpy()[j]
         cls  = classes[label-1]
+        
+        print('True boxes:', cls, box)
 
         box = box.tolist()
         draw = ImageDraw.Draw(orig)
         draw.text((box[0], box[1] - 10), cls, fill=(255, 40, 40))
         draw.rectangle(box, outline="green")
         del draw
-        
+       
     for j in ind:
         box = boxes[j]
         box = box.tolist()
+        cls = text_labels[j]
+        
+        print('Final pred boxes:', cls, box)
+        
         draw = ImageDraw.Draw(orig)
         draw.text((box[0], box[1]-10), text_labels[j], fill=(40,40,255))
         draw.rectangle(box, outline = "blue")
@@ -180,7 +189,7 @@ def get_model_result(img, model, target, i, device, location="", threshold=0.45,
             draw.rectangle(box, outline="red")
         '''
         del draw
-    #orig.show(command='fim')
-    orig.save(os.path.join(location, "result" + str(i) + ".png"))
+    orig.show(command='fim')
+    orig.save(os.path.join(location, "result" + str(id_) + ".png"))
     
     
