@@ -65,22 +65,18 @@ test.py
 
 ```source venv3/bin/activate```
 
-## Data Preprocessing
+```jupyter notebook```
 
-```python3 cleanup.py```
+## FRCNN
 
-Split images and labels into train and test folders maunally
+```FRCNN_colab.ipynb```
 
-- Add more images in train and some images to val (currently only very few)
+## Classifier training
 
+```cnn_classifier_train.ipynb```
 
-## Train and Test
+Change experiemnt name in colab (see top cell)
 
-```python3 train.py```
-
-- For training, please run train.py so to generate the model; or you can simply download the pre-trained model from: https://drive.google.com/drive/folders/1UuU5up0DQfRuafdbZrayPdRwpVvJOYYK?usp=sharing
-
-```python3 test.py```
 
 - the testing results will be written into the output folder, here's an example of prediction:![Example Output](https://github.com/adoskk/KaggleFaceMaskDetection/blob/master/output/result4.png)
 
